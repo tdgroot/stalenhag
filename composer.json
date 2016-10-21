@@ -1,7 +1,6 @@
 {
     "name": "timpack/stalenhag",
     "description": "Fetch Stalenhag art to your machine!",
-    "minimum-stability": "dev",
     "license": "proprietary",
     "authors": [
         {
