@@ -1,0 +1,7 @@
+#!/usr/bin/env php
+<?php
+
+require_once(dirname(__DIR__) . '/vendor/autoload.php');
+
+$fetch = new \Timpack\Stalenhag\Fetch();
+$fetch->run();

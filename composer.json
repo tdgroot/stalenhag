@@ -1,0 +1,19 @@
+{
+    "name": "timpack/stalenhag",
+    "description": "Fetch Stalenhag art to your machine!",
+    "minimum-stability": "dev",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Timon de Groot",
+            "email": "tdegroot96@gmail.com"
+        }
+    ],
+    "autoload":
+    {
+        "psr-4": {
+            "Timpack\\Stalenhag\\": "src/"
+        }
+    },
+    "bin": ["bin/stalenhag"]
+}
