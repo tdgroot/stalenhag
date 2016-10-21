@@ -1,5 +1,11 @@
 #!/usr/bin/env php
 <?php
 
+if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
+    require_once(dirname(__DIR__) . '/vendor/autoload.php');
+} else {
+    require_once(dirname(dirname(dirname(__DIR__))) . '/autoload.php');
+}
+
 $fetch = new \Timpack\Stalenhag\Fetch();
 $fetch->run();
