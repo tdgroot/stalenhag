@@ -35,7 +35,12 @@ class Fetch
             if (file_exists($filePath) && !isset($options['f'])) {
                 continue;
             }
-            $contents = file_get_contents(self::BASE_URI . "/$img");
+            $imgUrl = self::BASE_URI . $img;
+            $contents = @file_get_contents($imgUrl);
+            if (!$contents) {
+                echo "Failed to fetch $imgUrl!\n";
+                continue;
+            }
             $fh = fopen($filePath, 'w');
             fwrite($fh, $contents);
             fclose($fh);
