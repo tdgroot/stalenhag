@@ -4,8 +4,13 @@ namespace Timpack\Stalenhag;
 
 class Fetch
 {
-
     const BASE_URI = 'http://simonstalenhag.se/';
+    const ADDITIONAL_URIS = [
+        'http://simonstalenhag.se/labyrinth.html',
+        'http://simonstalenhag.se/es.html',
+        'http://simonstalenhag.se/tftf.html',
+        'http://simonstalenhag.se/tftl.html'
+    ];
 
     public function run()
     {
@@ -29,8 +34,7 @@ class Fetch
         }
 
         $images = $this->getImageNames();
-        foreach ($images as $basename => $img)
-        {
+        foreach ($images as $basename => $img) {
             $filePath = $path . DIRECTORY_SEPARATOR . $basename;
             if (file_exists($filePath) && !isset($options['f'])) {
                 continue;
@@ -53,21 +57,29 @@ class Fetch
     protected function getImageNames()
     {
         $result = [];
-        $response = file_get_contents(self::BASE_URI);
+        $pages = array_merge([self::BASE_URI], self::ADDITIONAL_URIS);
 
-        $matches = [];
-        preg_match_all('/<a href="([^"]+\.(jpg|png))" .*>/', $response, $matches);
-        if (!isset($matches[1])) {
-            return [];
-        }
-        $images = array_unique($matches[1]);
-        foreach ($images as $image) {
-            $imageMatches = [];
-            preg_match('/[\/]+(.*)/', $image, $imageMatches);
-            if (isset($result[$imageMatches[1]])) {
+        foreach ($pages as $page) {
+            $response = file_get_contents($page);
+            if (!$response) {
+                echo "Failed to fetch $page!\n";
                 continue;
             }
-            $result[$imageMatches[1]] = $image;
+
+            $matches = [];
+            preg_match_all('/<a href="([^"]+\.(jpg|png))" .*>/', $response, $matches);
+            if (!isset($matches[1])) {
+                continue;
+            }
+            $images = array_unique($matches[1]);
+            foreach ($images as $image) {
+                $imageMatches = [];
+                preg_match('/[\/]+(.*)/', $image, $imageMatches);
+                if (isset($result[$imageMatches[1]])) {
+                    continue;
+                }
+                $result[$imageMatches[1]] = $image;
+            }
         }
         return $result;
     }
@@ -80,5 +92,4 @@ class Fetch
         }
         return $path;
     }
-
 }
