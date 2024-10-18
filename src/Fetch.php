@@ -4,14 +4,14 @@ namespace Timpack\Stalenhag;
 
 class Fetch
 {
-    const BASE_URI = 'http://simonstalenhag.se/';
+    const BASE_URI = 'https://simonstalenhag.se/';
     const ADDITIONAL_URIS = [
-        'http://simonstalenhag.se/es.html',
-        'http://simonstalenhag.se/euromek.html',
-        'http://simonstalenhag.se/labyrinth.html',
-        'http://simonstalenhag.se/paleo.html',
-        'http://simonstalenhag.se/tftf.html',
-        'http://simonstalenhag.se/tftl.html',
+        'https://simonstalenhag.se/es.html',
+        'https://simonstalenhag.se/euromek.html',
+        'https://simonstalenhag.se/labyrinth.html',
+        'https://simonstalenhag.se/paleo.html',
+        'https://simonstalenhag.se/tftf.html',
+        'https://simonstalenhag.se/tftl.html',
     ];
 
     public function run()
