@@ -6,10 +6,12 @@ class Fetch
 {
     const BASE_URI = 'http://simonstalenhag.se/';
     const ADDITIONAL_URIS = [
-        'http://simonstalenhag.se/labyrinth.html',
         'http://simonstalenhag.se/es.html',
+        'http://simonstalenhag.se/euromek.html',
+        'http://simonstalenhag.se/labyrinth.html',
+        'http://simonstalenhag.se/paleo.html',
         'http://simonstalenhag.se/tftf.html',
-        'http://simonstalenhag.se/tftl.html'
+        'http://simonstalenhag.se/tftl.html',
     ];
 
     public function run()
