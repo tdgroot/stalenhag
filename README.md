@@ -29,13 +29,14 @@ It only downloads the files that you don't have yet.
 
 ### Requirements
 
-- php >= 5.6
-- composer
+- PHP >= 8.1
+- Composer
 
 ### Developed using
 
-- php >= 7.0
-- linux kernel >= 4.4
+- PHP >= 8.1
+- Modern PHP features (strict types, type declarations, exceptions)
+- PSR-12 coding standards
 
 ### Credits
 

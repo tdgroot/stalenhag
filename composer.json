@@ -9,11 +9,17 @@
             "email": "tdegroot96@gmail.com"
         }
     ],
-    "autoload":
-    {
+    "require": {
+        "php": "^8.1"
+    },
+    "autoload": {
         "psr-4": {
             "Timpack\\Stalenhag\\": "src/"
         }
     },
-    "bin": ["bin/stalenhag"]
+    "bin": ["bin/stalenhag"],
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
 }
