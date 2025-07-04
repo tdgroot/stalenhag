@@ -76,7 +76,7 @@ class Fetch
 
     private function fetchContent(string $url): string
     {
-        $contents = file_get_contents($url);
+        $contents = @file_get_contents($url);
         if ($contents === false) {
             throw new RuntimeException("Failed to fetch content from $url");
         }
