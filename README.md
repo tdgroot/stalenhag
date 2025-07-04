@@ -12,7 +12,7 @@ It only downloads the files that you don't have yet.
 - Make sure `~/.config/composer/vendor/bin` is in your `$PATH` variable
 
 **The git way**
-- Run command `git clone git@github.com:Desmaster/stalenhag.git`
+- Run command `git clone git@github.com:tdgroot/stalenhag.git`
 - Then run the application using `bin/stalenhag` 
 
 ### Usage
@@ -31,12 +31,6 @@ It only downloads the files that you don't have yet.
 
 - PHP >= 8.1
 - Composer
-
-### Developed using
-
-- PHP >= 8.1
-- Modern PHP features (strict types, type declarations, exceptions)
-- PSR-12 coding standards
 
 ### Credits
 
