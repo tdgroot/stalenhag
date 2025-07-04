@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Timpack\Stalenhag;
+
+use RuntimeException;
+use InvalidArgumentException;
 
 class Fetch
 {
-    const BASE_URI = 'https://simonstalenhag.se/';
-    const ADDITIONAL_URIS = [
+    private const BASE_URI = 'https://simonstalenhag.se/';
+    private const ADDITIONAL_URIS = [
         'https://simonstalenhag.se/es.html',
         'https://simonstalenhag.se/euromek.html',
         'https://simonstalenhag.se/labyrinth.html',
@@ -14,83 +19,130 @@ class Fetch
         'https://simonstalenhag.se/tftl.html',
     ];
 
-    public function run()
+    public function run(): void
     {
         $options = getopt('fv', ['path:']);
         if (!isset($options['path']) || !$path = $options['path']) {
-            echo 'No path given, please specify it using --path "path/to/directory"' . "\n";
-            exit(E_ERROR);
+            $this->outputError('No path given, please specify it using --path "path/to/directory"');
+            return;
         }
 
-        $path = $this->resolveTilde($path);
-        $path = rtrim($path, DIRECTORY_SEPARATOR);
+        try {
+            $path = $this->resolveTilde($path);
+            $path = rtrim($path, DIRECTORY_SEPARATOR);
 
+            $this->validatePath($path);
+
+            $images = $this->getImageNames();
+            $this->downloadImages($images, $path, $options);
+        } catch (RuntimeException | InvalidArgumentException $e) {
+            $this->outputError($e->getMessage());
+        }
+    }
+
+    private function validatePath(string $path): void
+    {
         if (!is_dir($path)) {
-            echo "ERROR: $path is not a directory.\n";
-            exit(E_ERROR);
+            throw new InvalidArgumentException("ERROR: $path is not a directory.");
         }
 
         if (!is_writable($path)) {
-            echo "ERROR: $path is not writable.\n";
-            exit(E_ERROR);
+            throw new InvalidArgumentException("ERROR: $path is not writable.");
         }
+    }
 
-        $images = $this->getImageNames();
+    private function downloadImages(array $images, string $path, array $options): void
+    {
         foreach ($images as $basename => $img) {
             $filePath = $path . DIRECTORY_SEPARATOR . $basename;
             if (file_exists($filePath) && !isset($options['f'])) {
                 continue;
             }
+
             $imgUrl = self::BASE_URI . $img;
-            $contents = @file_get_contents($imgUrl);
-            if (!$contents) {
-                echo "Failed to fetch $imgUrl!\n";
+            try {
+                $contents = $this->fetchContent($imgUrl);
+                $this->saveFile($filePath, $contents);
+                
+                if (isset($options['v'])) {
+                    echo "Saved $filePath\n";
+                }
+            } catch (RuntimeException $e) {
+                echo "Failed to fetch $imgUrl: " . $e->getMessage() . "\n";
                 continue;
-            }
-            $fh = fopen($filePath, 'w');
-            fwrite($fh, $contents);
-            fclose($fh);
-            if (isset($options['v'])) {
-                echo "Saved $filePath\n";
             }
         }
     }
 
-    protected function getImageNames()
+    private function fetchContent(string $url): string
+    {
+        $contents = file_get_contents($url);
+        if ($contents === false) {
+            throw new RuntimeException("Failed to fetch content from $url");
+        }
+        return $contents;
+    }
+
+    private function saveFile(string $filePath, string $contents): void
+    {
+        $result = file_put_contents($filePath, $contents);
+        if ($result === false) {
+            throw new RuntimeException("Failed to save file to $filePath");
+        }
+    }
+
+    private function outputError(string $message): void
+    {
+        echo "ERROR: $message\n";
+        exit(1);
+    }
+
+    protected function getImageNames(): array
     {
         $result = [];
         $pages = array_merge([self::BASE_URI], self::ADDITIONAL_URIS);
 
         foreach ($pages as $page) {
-            $response = file_get_contents($page);
-            if (!$response) {
-                echo "Failed to fetch $page!\n";
+            try {
+                $response = $this->fetchContent($page);
+                $images = $this->extractImageUrls($response);
+                $result = array_merge($result, $images);
+            } catch (RuntimeException $e) {
+                echo "Failed to fetch $page: " . $e->getMessage() . "\n";
                 continue;
             }
+        }
+        return $result;
+    }
 
-            $matches = [];
-            preg_match_all('/<a href="([^"]+\.(jpg|png))" .*>/', $response, $matches);
-            if (!isset($matches[1])) {
-                continue;
-            }
-            $images = array_unique($matches[1]);
-            foreach ($images as $image) {
-                $imageMatches = [];
-                preg_match('/[\/]+(.*)/', $image, $imageMatches);
-                if (isset($result[$imageMatches[1]])) {
-                    continue;
-                }
+    private function extractImageUrls(string $response): array
+    {
+        $result = [];
+        $matches = [];
+        preg_match_all('/<a href="([^"]+\.(jpg|png))" .*>/', $response, $matches);
+        
+        if (!isset($matches[1])) {
+            return $result;
+        }
+        
+        $images = array_unique($matches[1]);
+        foreach ($images as $image) {
+            $imageMatches = [];
+            preg_match('/[\/]+(.*)/', $image, $imageMatches);
+            if (isset($imageMatches[1]) && !isset($result[$imageMatches[1]])) {
                 $result[$imageMatches[1]] = $image;
             }
         }
         return $result;
     }
 
-    protected function resolveTilde($path)
+    protected function resolveTilde(string $path): string
     {
-        if (function_exists('posix_getuid') && strpos($path, '~') === 0) {
+        if (function_exists('posix_getuid') && str_starts_with($path, '~')) {
             $info = posix_getpwuid(posix_getuid());
-            $path = str_replace('~', $info['dir'], $path);
+            if ($info !== false && isset($info['dir'])) {
+                $path = str_replace('~', $info['dir'], $path);
+            }
         }
         return $path;
     }
